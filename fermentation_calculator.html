@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון התססה המקצועי</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { max-width: 650px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 20px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 5px; }
+        .header p { font-size: 12px; opacity: 0.8; }
+        .tabs { display: flex; background: #ecf0f1; border-bottom: 2px solid #bdc3c7; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: none; cursor: pointer; font-weight: 500; color: #34495e; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab-btn.active { background: white; color: #2c3e50; border-bottom-color: #2c3e50; }
+        .content { padding: 20px; }
+        .tab { display: none; }
+        .tab.active { display: block; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; color: #2c3e50; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 2px solid #ecf0f1; border-radius: 5px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #2c3e50; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .flour-section { background: #f9f9f9; padding: 15px; border-radius: 8px; border-right: 4px solid #2c3e50; margin-bottom: 15px; }
+        .flour-section h4 { color: #2c3e50; margin-bottom: 10px; font-size: 14px; }
+        .flour-section.hidden { display: none; }
+        .add-flour-btn { background: #27ae60; color: white; padding: 8px 15px; font-size: 12px; margin-top: 10px; }
+        .add-flour-btn:hover { background: #229954; }
+        .remove-flour-btn { background: #e74c3c; color: white; padding: 5px 10px; font-size: 11px; margin-top: 10px; }
+        .flour-summary { background: #ecf0f1; padding: 12px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; }
+        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        button { padding: 12px; border: none; border-radius: 5px; font-weight: 600; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #2c3e50; color: white; grid-column: 1 / -1; }
+        .btn-primary:hover { background: #34495e; }
+        .btn-secondary { background: #ecf0f1; color: #34495e; }
+        .result-box { background: linear-gradient(135deg, #27ae60 0%, #1abc9c 100%); color: white; padding: 25px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
+        .result-time { font-size: 48px; font-weight: bold; margin: 10px 0; }
+        .result-note { font-size: 12px; opacity: 0.9; margin-top: 10px; }
+        .timeline-item { padding: 10px; background: #f0f0f0; margin-bottom: 8px; border-radius: 5px; border-right: 3px solid #2c3e50; font-size: 13px; }
+        .timeline-time { font-weight: 600; color: #2c3e50; }
+        .info-box { background: #ecf0f1; padding: 10px; border-radius: 5px; border-right: 3px solid #2c3e50; margin-bottom: 10px; font-size: 13px; }
+        .warning-box { background: #fff3cd; padding: 10px; border-radius: 5px; border-right: 3px solid #f39c12; margin-bottom: 10px; font-size: 13px; }
+        .hidden { display: none; }
+        .flour-item { padding: 10px; background: #f0f0f0; margin-bottom: 8px; border-radius: 5px; cursor: pointer; border-right: 4px solid transparent; transition: 0.3s; }
+        .flour-item.selected { background: white; border-right-color: #2c3e50; }
+        .flour-item.selected .flour-name { color: #2c3e50; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍞 מחשבון התססה</h1>
+            <p>מבוסס Q10 Model עדין - 75 דקות בטמפ' 24°C עם 2% שמרים</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('calc')">מחשבון</button>
+            <button class="tab-btn" onclick="switchTab('ref')">קמחים</button>
+            <button class="tab-btn" onclick="switchTab('cal')">קליברציה</button>
+        </div>
+
+        <div class="content">
+            <!-- CALCULATOR TAB -->
+            <div id="calc" class="tab active">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">🌾 בחר קמחים לתערובת</h3>
+                <div class="info-box">💡 בחר קמח ותן משקל בגרמים. המחשבון יחשב ממוצע משוקלל לכל הקמחים</div>
+
+                <!-- FLOUR 1 -->
+                <div class="flour-section" id="flour1Section">
+                    <h4>קמח #1 (חובה)</h4>
+                    <div class="form-group">
+                        <label>בחר קמח</label>
+                        <select id="flour1Select" onchange="selectFlour(1, this.value)" style="width: 100%; padding: 10px; border: 2px solid #ecf0f1; border-radius: 5px; font-size: 14px;">
+                            <option value="">-- בחר קמח --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>משקל בגרמים</label>
+                        <input type="number" id="flour1Grams" placeholder="לדוגמה: 700" min="0" step="10" onchange="updateSummary()">
+                    </div>
+                </div>
+
+                <!-- FLOUR 2 -->
+                <div class="flour-section" id="flour2Section">
+                    <h4>קמח #2 (אופציונלי)</h4>
+                    <div class="form-group">
+                        <label>בחר קמח</label>
+                        <select id="flour2Select" onchange="selectFlour(2, this.value)" style="width: 100%; padding: 10px; border: 2px solid #ecf0f1; border-radius: 5px; font-size: 14px;">
+                            <option value="">-- בחר קמח --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>משקל בגרמים</label>
+                        <input type="number" id="flour2Grams" placeholder="לדוגמה: 300" min="0" step="10" onchange="updateSummary()">
+                    </div>
+                    <button class="remove-flour-btn" onclick="removeFlour(2)">🗑️ הסר קמח זה</button>
+                </div>
+
+                <!-- FLOUR 3 -->
+                <div class="flour-section hidden" id="flour3Section">
+                    <h4>קמח #3 (אופציונלי)</h4>
+                    <div class="form-group">
+                        <label>בחר קמח</label>
+                        <select id="flour3Select" onchange="selectFlour(3, this.value)" style="width: 100%; padding: 10px; border: 2px solid #ecf0f1; border-radius: 5px; font-size: 14px;">
+                            <option value="">-- בחר קמח --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>משקל בגרמים</label>
+                        <input type="number" id="flour3Grams" placeholder="לדוגמה: 200" min="0" step="10" onchange="updateSummary()">
+                    </div>
+                    <button class="remove-flour-btn" onclick="removeFlour(3)">🗑️ הסר קמח זה</button>
+                </div>
+
+                <button id="addFlourBtn" class="add-flour-btn" onclick="addFlour()" style="width: 100%;">➕ הוסף קמח נוסף</button>
+
+                <!-- FLOUR SUMMARY -->
+                <div id="flourSummary" class="flour-summary hidden"></div>
+
+                <!-- YEAST -->
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-right: 4px solid #f39c12;">
+                    <h4 style="color: #f39c12; margin-bottom: 10px;">🤖 שמרים / מחמצת</h4>
+                    <div class="form-group">
+                        <label>שיטת התססה</label>
+                        <select id="method" onchange="updateMethod()">
+                            <option value="yeast">שמרים מסחריים</option>
+                            <option value="sourdough">מחמצת</option>
+                        </select>
+                    </div>
+
+                    <div id="yeastDiv">
+                        <div class="form-group">
+                            <label>סוג שמרים</label>
+                            <select id="yeastType" onchange="updateYeastType()">
+                                <option value="instant">שמרים יבשים מיידיים (Instant Dry Yeast)</option>
+                                <option value="active">שמרים יבשים פעילים (Active Dry Yeast)</option>
+                                <option value="fresh">שמרים טריים (Fresh Yeast) - קומפרסד</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label id="yeastPercentLabel">% שמרים מהקמח</label>
+                                <input type="number" id="yeastPercent" value="1" min="0.1" max="10" step="0.1" onchange="convertYeast()">
+                            </div>
+                            <div class="form-group">
+                                <label id="yeastGramsLabel">או גרמים</label>
+                                <input type="number" id="yeastGrams" value="0" min="0" step="1" onchange="convertYeastGrams()">
+                            </div>
+                        </div>
+                        <div class="info-box">💡 בחר סוג שמרים תחילה! המחשבון יעדכן את הכמויות ועם החישובים המדויקים</div>
+                    </div>
+
+                    <div id="sourdoughDiv" class="hidden">
+                        <div class="form-group">
+                            <label>% הזרעת מחמצת מהקמח</label>
+                            <input type="number" id="levain" value="20" min="5" max="50" step="5">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TEMPERATURE & PARAMETERS -->
+                <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; border-right: 4px solid #3498db;">
+                    <h4 style="color: #2980b9; margin-bottom: 10px;">🌡️ פרמטרים</h4>
+                    
+                    <div class="form-group">
+                        <label>טמפרטורת הבצק הרצויה (°C)</label>
+                        <select id="ddt">
+                            <option value="20">20°C - תססה ארוכה מאוד (12+ שעות)</option>
+                            <option value="22">22°C - תססה ארוכה (8-10 שעות)</option>
+                            <option value="24" selected>24°C - סטנדרט (4-5 שעות) ⭐</option>
+                            <option value="26">26°C - תססה קצרה (2-3 שעות)</option>
+                            <option value="28">28°C - תססה מהירה מאוד (1-2 שעות)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>מים בגרמים</label>
+                            <input type="number" id="waterGrams" value="650" min="0" step="10" onchange="calculateHydration()">
+                        </div>
+                        <div class="form-group">
+                            <label>הידרציה מחושבת (%)</label>
+                            <input type="number" id="hydration" value="65" min="50" max="90" step="0.1" readonly style="background: #f0f0f0; cursor: not-allowed;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>מלח (%)</label>
+                        <input type="number" id="salt" value="2" min="0" max="4" step="0.1">
+                    </div>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn-primary" onclick="calculate()">📊 חשב תססה</button>
+                    <button class="btn-secondary" onclick="reset()">🔄 אפס הכל</button>
+                </div>
+
+                <div id="resultDiv" class="hidden" style="margin-top: 20px;">
+                    <div class="result-box">
+                        <div>זמן התססה הראשונית (מטרה)</div>
+                        <div class="result-time" id="resultTime">--</div>
+                        <div id="resultRange">--</div>
+                        <div class="result-note">⚠️ השתמש בעיניים ובחוש! זהו הערכה בלבד</div>
+                    </div>
+                    <div id="timeline"></div>
+                </div>
+            </div>
+
+            <!-- FLOURS REFERENCE TAB -->
+            <div id="ref" class="tab">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">📚 רשימת כל הקמחים</h3>
+                <div id="floursList"></div>
+            </div>
+
+            <!-- CALIBRATION TAB -->
+            <div id="cal" class="tab">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">📏 קליברציה</h3>
+                <div class="info-box">הוסף קליברציות כדי שתזכור את הנתונים בפועל שלך!</div>
+                <div id="logDiv"></div>
+                <div style="margin-top: 15px; background: #f5f5f5; padding: 15px; border-radius: 5px;">
+                    <div class="form-group">
+                        <label>פירוט</label>
+                        <input type="text" id="notes" placeholder="לדוגמה: לחם שיפון + דורום">
+                    </div>
+                    <div class="form-group">
+                        <label>זמן חזוי (דקות)</label>
+                        <input type="number" id="pred" min="0" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>זמן בפועל (דקות)</label>
+                        <input type="number" id="actual" min="0" step="1">
+                    </div>
+                    <button class="btn-primary" onclick="addCal()">➕ שמור קליברציה</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // Service Worker Registration
+        // ============================================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => {
+                    console.log('✅ Service Worker הרשום בהצלחה');
+                })
+                .catch(err => {
+                    console.log('⚠️ שגיאה בהרשמת Service Worker:', err);
+                });
+        }
+
+        // ============================================
+        // DATABASE - קמחים שטיבל + קמחים חדשים
+        // ============================================
+        const FLOURS = {
+            t405: { name: 'שטיבל 405 (לבן בהיר)', protein: 10.0, hydrationBase: 58 },
+            t650: { name: 'שטיבל 650 (לבן קלאסי)', protein: 10.8, hydrationBase: 62 },
+            t1: { name: 'שטיבל 1 (רב תכליתי)', protein: 10.5, hydrationBase: 60 },
+            t2: { name: 'שטיבל 2 (לחם)', protein: 12.9, hydrationBase: 67 },
+            t3: { name: 'שטיבל 3 (קמח כפרי)', protein: 12.0, hydrationBase: 68 },
+            t4: { name: 'שטיבל 4 (עוגיות)', protein: 9.7, hydrationBase: 55 },
+            t5: { name: 'שטיבל 5 (עוגות)', protein: 9.5, hydrationBase: 55 },
+            t6: { name: 'שטיבל 6 (חיטה מלאה)', protein: 13.5, hydrationBase: 75 },
+            t14: { name: 'שטיבל 14 (כוסמין מלא)', protein: 12.0, hydrationBase: 72 },
+            t15: { name: 'שטיבל 15 (קמח כפרי)', protein: 11.5, hydrationBase: 68 },
+            t17: { name: 'שטיבל 17 (פיצה)', protein: 12.5, hydrationBase: 64 },
+            t18: { name: 'שטיבל 18 (חלה)', protein: 11.0, hydrationBase: 60 },
+            t20: { name: 'שטיבל 20 (מניטובה)', protein: 14.5, hydrationBase: 80 },
+            rye: { name: 'קמח שיפון מלא', protein: 12.0, hydrationBase: 80 },
+            durum: { name: 'קמח דורום', protein: 13.5, hydrationBase: 65 },
+            artisan: { name: 'קמח ארטיזן', protein: 11.5, hydrationBase: 62 },
+            emmer: { name: 'קמח אמר', protein: 13.0, hydrationBase: 70 },
+            einkorn: { name: 'קמח איינקורן', protein: 14.0, hydrationBase: 65 },
+            khorasan: { name: 'קמח חורסאן', protein: 12.5, hydrationBase: 68 }
+        };
+
+        const selections = { flour1: 't650', flour2: null, flour3: null };
+        let calibrations = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('✅ Service Worker registered:', reg.scope))
+                    .catch(err => console.log('❌ Service Worker registration failed:', err));
+            }
+            
+            renderFlourSelectors();
+            loadCals();
+            convertYeast();
+        });
+
+        function renderFlourSelectors() {
+            const createSelectOptions = () => {
+                let html = '<option value="">-- בחר קמח --</option>';
+                Object.entries(FLOURS).forEach(([id, f]) => {
+                    html += `<option value="${id}">${f.name} (חלבון: ${f.protein}%)</option>`;
+                });
+                return html;
+            };
+
+            const optionsHtml = createSelectOptions();
+            document.getElementById('flour1Select').innerHTML = optionsHtml;
+            document.getElementById('flour2Select').innerHTML = optionsHtml;
+            document.getElementById('flour3Select').innerHTML = optionsHtml;
+            
+            // עדכן את הערכים המנויים
+            if (selections.flour1) document.getElementById('flour1Select').value = selections.flour1;
+            if (selections.flour2) document.getElementById('flour2Select').value = selections.flour2;
+            if (selections.flour3) document.getElementById('flour3Select').value = selections.flour3;
+
+            const refDiv = document.getElementById('floursList');
+            refDiv.innerHTML = Object.values(FLOURS).map(f => `
+                <div style="background: #f0f0f0; padding: 12px; margin-bottom: 10px; border-radius: 5px; font-size: 13px;">
+                    <div style="font-weight: 600; color: #2c3e50;">${f.name}</div>
+                    <div>חלבון: ${f.protein}% | בסיס ספיחה: ${f.hydrationBase}%</div>
+                </div>
+            `).join('');
+        }
+
+        function selectFlour(num, id) {
+            selections['flour' + num] = id || null;
+            updateSummary();
+        }
+
+        function addFlour() {
+            const flour2Grams = document.getElementById('flour2Grams').value;
+            if (!flour2Grams || selections.flour2 === null) {
+                alert('מלא קמח #2 תחילה!');
+                return;
+            }
+            document.getElementById('flour3Section').classList.remove('hidden');
+            document.getElementById('addFlourBtn').style.display = 'none';
+        }
+
+        function removeFlour(num) {
+            selections['flour' + num] = null;
+            document.getElementById('flour' + num + 'Section').classList.add('hidden');
+            document.getElementById('flour' + num + 'Grams').value = '';
+            if (num === 3) document.getElementById('addFlourBtn').style.display = 'block';
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const g1 = parseInt(document.getElementById('flour1Grams').value) || 0;
+            const g2 = parseInt(document.getElementById('flour2Grams').value) || 0;
+            const g3 = parseInt(document.getElementById('flour3Grams').value) || 0;
+            const total = g1 + g2 + g3;
+
+            if (total === 0) {
+                document.getElementById('flourSummary').classList.add('hidden');
+                return;
+            }
+
+            let html = '<strong>סך הקמח:</strong> ' + total + 'g | ';
+            if (selections.flour1) html += `${FLOURS[selections.flour1].name}: ${g1}g (${(g1/total*100).toFixed(1)}%)`;
+            if (selections.flour2 && g2 > 0) html += ` | ${FLOURS[selections.flour2].name}: ${g2}g (${(g2/total*100).toFixed(1)}%)`;
+            if (selections.flour3 && g3 > 0) html += ` | ${FLOURS[selections.flour3].name}: ${g3}g (${(g3/total*100).toFixed(1)}%)`;
+
+            document.getElementById('flourSummary').innerHTML = html;
+            document.getElementById('flourSummary').classList.remove('hidden');
+        }
+
+        function calculateHydration() {
+            const g1 = parseInt(document.getElementById('flour1Grams').value) || 0;
+            const g2 = parseInt(document.getElementById('flour2Grams').value) || 0;
+            const g3 = parseInt(document.getElementById('flour3Grams').value) || 0;
+            const totalFlour = g1 + g2 + g3;
+            
+            const waterGrams = parseFloat(document.getElementById('waterGrams').value) || 0;
+            
+            if (totalFlour === 0) {
+                document.getElementById('hydration').value = '0';
+                return;
+            }
+            
+            // חישוב הידרציה: (מים / קמח) × 100
+            const hydration = (waterGrams / totalFlour) * 100;
+            document.getElementById('hydration').value = hydration.toFixed(1);
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function updateMethod() {
+            const method = document.getElementById('method').value;
+            document.getElementById('yeastDiv').classList.toggle('hidden', method === 'sourdough');
+            document.getElementById('sourdoughDiv').classList.toggle('hidden', method === 'yeast');
+        }
+
+        function updateYeastType() {
+            const yeastType = document.getElementById('yeastType').value;
+            const percentLabel = document.getElementById('yeastPercentLabel');
+            const gramsLabel = document.getElementById('yeastGramsLabel');
+            
+            // עדכון התוויות בהתאם לסוג
+            if (yeastType === 'fresh') {
+                percentLabel.textContent = '% שמרים טריים מהקמח';
+                gramsLabel.textContent = 'גרמים שמרים טריים';
+            } else if (yeastType === 'active') {
+                percentLabel.textContent = '% שמרים יבשים פעילים מהקמח';
+                gramsLabel.textContent = 'גרמים שמרים יבשים פעילים';
+            } else {
+                percentLabel.textContent = '% שמרים יבשים מיידיים מהקמח';
+                gramsLabel.textContent = 'גרמים שמרים יבשים מיידיים';
+            }
+            
+            convertYeast();
+        }
+
+        function convertYeast() {
+            const g1 = parseInt(document.getElementById('flour1Grams').value) || 0;
+            const g2 = parseInt(document.getElementById('flour2Grams').value) || 0;
+            const g3 = parseInt(document.getElementById('flour3Grams').value) || 0;
+            const totalFlour = g1 + g2 + g3;
+            
+            const yeastPercent = parseFloat(document.getElementById('yeastPercent').value) || 0;
+            const yeastType = document.getElementById('yeastType').value;
+            
+            if (totalFlour === 0) {
+                document.getElementById('yeastGrams').value = '0';
+                return;
+            }
+            
+            // חישוב פשוט: גרמים = (קמח × אחוז) / 100
+            // ללא כל המרה! האחוז שהמשתמש מזין הוא בדיוק לסוג השמרים שבחר
+            const yeastGrams = (totalFlour * yeastPercent) / 100;
+            document.getElementById('yeastGrams').value = yeastGrams.toFixed(1);
+        }
+
+        function convertYeastGrams() {
+            const g1 = parseInt(document.getElementById('flour1Grams').value) || 0;
+            const g2 = parseInt(document.getElementById('flour2Grams').value) || 0;
+            const g3 = parseInt(document.getElementById('flour3Grams').value) || 0;
+            const totalFlour = g1 + g2 + g3;
+            
+            const yeastGrams = parseFloat(document.getElementById('yeastGrams').value) || 0;
+            
+            if (totalFlour === 0) {
+                document.getElementById('yeastPercent').value = '0';
+                return;
+            }
+            
+            // חישוב פשוט: אחוז = (גרמים / קמח) × 100
+            const percent = (yeastGrams / totalFlour) * 100;
+            document.getElementById('yeastPercent').value = percent.toFixed(2);
+        }
+
+        // ============================================
+        // חישוב התססה - TXCraig1 Model
+        // ============================================
+        function calculate() {
+            const g1 = parseInt(document.getElementById('flour1Grams').value) || 0;
+            const g2 = parseInt(document.getElementById('flour2Grams').value) || 0;
+            const g3 = parseInt(document.getElementById('flour3Grams').value) || 0;
+            const totalFlour = g1 + g2 + g3;
+
+            if (totalFlour === 0) { alert('הזן משקל קמח!'); return; }
+
+            // חישוב ממוצע משוקלל של החלבון
+            let avgProtein = 0;
+            if (selections.flour1) avgProtein += FLOURS[selections.flour1].protein * (g1 / totalFlour);
+            if (selections.flour2 && g2 > 0) avgProtein += FLOURS[selections.flour2].protein * (g2 / totalFlour);
+            if (selections.flour3 && g3 > 0) avgProtein += FLOURS[selections.flour3].protein * (g3 / totalFlour);
+
+            // קרא נתונים
+            const ddt = parseFloat(document.getElementById('ddt').value);
+            const yeastPercent = parseFloat(document.getElementById('yeastPercent').value) || 1;
+            const hydration = parseFloat(document.getElementById('hydration').value) || 65;
+
+            // ============================================
+            // TXCraig1 Model - נוסחה מדעית
+            // ============================================
+            
+            // ============================================
+            // נוסחה מדויקת לפי טבלה מקצועית
+            // ============================================
+            // הנתון: בטמפ' 24°C עם 2% שמרים = 75 דקות
+            // בטמפ' 24°C עם 1% שמרים = 75 × 2 = 150 דקות
+            
+            const baseTime75At24 = 75; // זמן בטמפ' 24°C עם 2% שמרים
+            const baseTimeAt24 = baseTime75At24 * (2 / yeastPercent);
+            
+            // Q10 עדין: כל 2°C = ~20% שינוי בזמן
+            // זה מתורגם ל: Q10 = 1.2 per 2°C
+            const tempDiff = 24 - ddt;
+            const tempFactor = Math.pow(1.2, tempDiff / 2);
+            
+            // תיקון הידרציה
+            const hydrationFactor = 1 + ((hydration - 65) * 0.01);
+            
+            // החישוב הסופי
+            let bulkTime = baseTimeAt24 * tempFactor * hydrationFactor;
+            
+            const h = Math.floor(bulkTime / 60);
+            const m = Math.floor(bulkTime % 60);
+            
+            document.getElementById('resultDiv').classList.remove('hidden');
+            document.getElementById('resultTime').textContent = h + ':' + (m < 10 ? '0' : '') + m;
+            document.getElementById('resultRange').textContent = '(בערך ' + Math.floor(bulkTime - 15) + ' - ' + Math.floor(bulkTime + 15) + ' דקות)';
+            
+            const benchRest = 20; // ריסט לפני עיצוב
+            const proofTime = Math.max(60, bulkTime * 0.4); // הוכחה ~40% מהתססה
+            
+            const h2 = Math.floor(proofTime / 60);
+            const m2 = Math.floor(proofTime % 60);
+            
+            const timeline = `
+                <div class="timeline-item"><div class="timeline-time">T-0:30</div><div>🌊 אוטוליזה - קמח + מים בלבד</div></div>
+                <div class="timeline-item"><div class="timeline-time">T+0:00</div><div>🤖 ערבוב שמרים + מלח</div></div>
+                <div class="timeline-item"><div class="timeline-time">T+${h}:${m.toString().padStart(2, '0')}</div><div>✂️ עיצוב - סוף תססה ראשונית</div></div>
+                <div class="timeline-item"><div class="timeline-time">T+${h}:${(m + benchRest).toString().padStart(2, '0')}</div><div>⏸️ מנוחה לפני עיצוב</div></div>
+                <div class="timeline-item"><div class="timeline-time">T+${h}:${(m + benchRest).toString().padStart(2, '0')} עד T+${Math.floor((bulkTime + benchRest + proofTime) / 60)}:${Math.floor((bulkTime + benchRest + proofTime) % 60).toString().padStart(2, '0')}</div><div>👆 הוכחה סופית - עד ל-Poke Test</div></div>
+            `;
+            
+            document.getElementById('timeline').innerHTML = timeline;
+        }
+
+        function reset() {
+            document.getElementById('flour1Grams').value = '';
+            document.getElementById('flour2Grams').value = '';
+            document.getElementById('flour3Grams').value = '';
+            document.getElementById('yeastPercent').value = '1';
+            document.getElementById('yeastGrams').value = '0';
+            document.getElementById('levain').value = '20';
+            document.getElementById('ddt').value = '24';
+            document.getElementById('waterGrams').value = '650';
+            document.getElementById('hydration').value = '65';
+            document.getElementById('salt').value = '2';
+            document.getElementById('resultDiv').classList.add('hidden');
+            document.getElementById('flourSummary').classList.add('hidden');
+            calculateHydration();
+        }
+
+        function addCal() {
+            const notes = document.getElementById('notes').value;
+            const pred = parseInt(document.getElementById('pred').value);
+            const actual = parseInt(document.getElementById('actual').value);
+            
+            if (!notes || !pred || !actual) { alert('מלא הכל!'); return; }
+            
+            calibrations.push({ notes, pred, actual, date: new Date().toLocaleDateString('he-IL') });
+            localStorage.setItem('cals', JSON.stringify(calibrations));
+            
+            document.getElementById('notes').value = '';
+            document.getElementById('pred').value = '';
+            document.getElementById('actual').value = '';
+            
+            renderCals();
+            alert('✅ קליברציה נשמרה!');
+        }
+
+        function renderCals() {
+            const logDiv = document.getElementById('logDiv');
+            if (calibrations.length === 0) {
+                logDiv.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">אין עדיין קליברציות</div>';
+                return;
+            }
+            
+            logDiv.innerHTML = calibrations.map((c, i) => `
+                <div style="background: #f0f0f0; padding: 10px; margin-bottom: 10px; border-radius: 5px; border-right: 3px solid #2c3e50; font-size: 12px;">
+                    <div style="font-weight: 600; color: #2c3e50;">#${calibrations.length - i} • ${c.date}</div>
+                    <div>${c.notes}</div>
+                    <div style="color: #666;">חזוי: ${c.pred} דקות | בפועל: ${c.actual} דקות | הפרש: ${c.actual - c.pred}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadCals() {
+            const stored = localStorage.getItem('cals');
+            calibrations = stored ? JSON.parse(stored) : [];
+            renderCals();
+        }
+    </script>
+</body>
+</html>

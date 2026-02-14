@@ -1,0 +1,101 @@
+🍞 **הוראות התקנה: מחשבון התססה ל-Netlify + Android**
+====================================================
+
+## שלב 1: עלודה ל-GitHub (הכנה)
+
+1. צור חשבון GitHub חינם: https://github.com/signup
+2. צור repository חדש בשם `fermentation-calculator`
+3. ב-repository, עלה את הקבצים:
+   - fermentation_calculator.html
+   - manifest.json
+   - sw.js
+   - _headers
+   - _redirects
+
+או, אם אתה יודע git:
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/YOUR_USERNAME/fermentation-calculator.git
+git branch -M main
+git push -u origin main
+```
+
+---
+
+## שלב 2: התחבר ל-Netlify
+
+1. היכנס ל: https://app.netlify.com
+2. לחץ "Sign up" וחבר את חשבון GitHub שלך
+3. אתר את "fermentation-calculator" repository
+
+---
+
+## שלב 3: Deploy
+
+1. בעמוד Netlify, לחץ "New site from Git"
+2. בחר את ה-GitHub repository
+3. ודא שקבצי ה-build הם:
+   ```
+   Build command: (השאר ריק)
+   Publish directory: ./ (או את התיקייה עם הקבצים)
+   ```
+4. לחץ "Deploy site"
+5. Netlify ייצור לך URL כמו: `https://your-site-name.netlify.app`
+
+---
+
+## שלב 4: התקנה ל-Android (בטלפון!)
+
+### **דרך 1: Chrome (הכי פשוטה)**
+
+1. פתח את הטלפון שלך (Android)
+2. עלה ל-Chrome
+3. כנס: `https://your-site-name.netlify.app`
+4. לחץ על ⋮ (שלוש נקודות) בפינה → "Install app"
+5. לחץ "Install"
+6. ✅ האפליקציה מותקנת על הבית שלך!
+
+### **דרך 2: Firefox (אם Chrome לא עובד)**
+
+1. פתח Firefox
+2. כנס לאותו URL
+3. לחץ על ≡ (תפריט) → "Install"
+4. ✅ מותקנת!
+
+---
+
+## שלב 5: שימוש בחוץ קו
+
+המחשבון עובד **גם ללא אינטרנט**! 
+- נתונים נשמרים ב-`localStorage` בטלפון
+- הקליברציות נשמרות אוטומטית
+
+---
+
+## בדיקה שהכל עובד
+
+- 🔄 ניתן לשתף קבצים עם Netlify Share
+- 📱 יש icon ותמונה כמו אפליקציה רגילה
+- 💾 הכל מתעדכן בחוץ קו
+- 🔔 אפשר push notifications (אם רוצה)
+
+---
+
+## עדכון עתידי
+
+כשתוציא גרסה חדשה:
+
+1. שנה את הקבצים ב-GitHub
+2. Netlify תעדכן **אוטומטית**
+3. Service Worker ישדרג את ה-cache
+
+---
+
+**צריך עזרה?**
+- Netlify Docs: https://docs.netlify.com/
+- MDN PWA: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps
+- GitHub Docs: https://docs.github.com/
+
+בהצלחה! 🚀🍞
