@@ -1,10 +1,27 @@
-# Netlify Configuration for Fermentation Calculator PWA
+# Netlify Configuration
 # =====================================================
+# באתר הזה יושבות שתי אפליקציות:
+#   /                      — מחשבון ההתססה
+#   /moving-box-manager/   — ניהול ארגזים למעבר דירה
+# סדר כללי ההפניה חשוב: הכללים של אפליקציית הארגזים חייבים להופיע
+# לפני כלל ה-catch-all, אחרת כל בקשה תופנה למחשבון ההתססה.
 
 [build]
   command = ""
   publish = "."
 
+# --- ניהול ארגזים למעבר דירה ---
+[[redirects]]
+  from = "/moving-box-manager"
+  to = "/moving-box-manager/"
+  status = 301
+
+[[redirects]]
+  from = "/moving-box-manager/"
+  to = "/moving-box-manager/index.html"
+  status = 200
+
+# --- מחשבון ההתססה (כלל ברירת המחדל) ---
 [[redirects]]
   from = "/*"
   to = "/fermentation_calculator.html"
@@ -42,6 +59,32 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
     Content-Type = "application/javascript"
+
+# --- ניהול ארגזים: ביטול המטמון הארוך של *.js ---
+# מודולי האפליקציה מתעדכנים יחד עם הגרסה, ולכן חייבים להיבדק מול השרת.
+# בלי זה גרסה חדשה לא תגיע למכשירים עד לפקיעת המטמון.
+[[headers]]
+  for = "/moving-box-manager/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Content-Type = "application/javascript; charset=utf-8"
+
+[[headers]]
+  for = "/moving-box-manager/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Content-Type = "application/javascript; charset=utf-8"
+
+[[headers]]
+  for = "/moving-box-manager/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/moving-box-manager/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type = "application/manifest+json"
 
 [dev]
   command = "python -m SimpleHTTPServer 8000"
