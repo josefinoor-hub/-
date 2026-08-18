@@ -53,9 +53,14 @@ async function main() {
  */
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker
-    .register(new URL('../sw.js', import.meta.url), { scope: './' })
-    .catch((error) => console.warn('רישום Service Worker נכשל', error));
+  try {
+    navigator.serviceWorker
+      .register(new URL('../sw.js', import.meta.url), { scope: './' })
+      .catch((error) => console.warn('רישום Service Worker נכשל', error));
+  } catch (error) {
+    // למשל כשהדף מוגש כקובץ בודד ואין לצדו sw.js — האפליקציה עובדת בלעדיו
+    console.warn('אין Service Worker זמין', error);
+  }
 }
 
 main().catch((error) => {

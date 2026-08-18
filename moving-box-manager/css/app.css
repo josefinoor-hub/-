@@ -31,8 +31,13 @@
   --safe-top: env(safe-area-inset-top, 0px);
 }
 
+/* ערכת כהה.
+   שלושה מצבים אפשריים אצל הצופה: בחירה מפורשת בכהה, בחירה מפורשת בבהיר,
+   או "לפי המערכת" שאינה מסמנת דבר. לכן הטוקנים מוגדרים גם לפי העדפת
+   המערכת (מנוטרלת כשנבחר בהיר במפורש) וגם לפי בחירה מפורשת בכהה. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+
     --bg: #0b1220;
     --surface: #131c2e;
     --surface-2: #0f172a;
@@ -49,6 +54,25 @@
     --success: #4ade80;
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
   }
+}
+
+:root[data-theme="dark"] {
+
+    --bg: #0b1220;
+    --surface: #131c2e;
+    --surface-2: #0f172a;
+    --border: #24334d;
+    --text: #e8eefc;
+    --text-muted: #94a3b8;
+    --primary: #3b82f6;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --warn-bg: #422006;
+    --priority: #fca5a5;
+    --priority-bg: #450a0a;
+    --pending: #c4b5fd;
+    --success: #4ade80;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
 }
 
 * { box-sizing: border-box; }
