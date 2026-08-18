@@ -165,6 +165,7 @@ function handlePush(incomingBoxes, device) {
           incoming.number = allocateNumbers(1).from;
           incoming.boxNumber = formatBoxNumber(incoming.number);
         }
+        reserveNumberIfNeeded(incoming.number);
         incoming.seq = ++seq;
         appended.push(toSheetRow(incoming));
         resolved.push(toClientBox(incoming));
@@ -183,6 +184,7 @@ function handlePush(incomingBoxes, device) {
           incoming.boxNumber = formatBoxNumber(incoming.number);
         }
         incoming.createdAt = existing.createdAt || incoming.createdAt;
+        reserveNumberIfNeeded(incoming.number);
         incoming.seq = ++seq;
         updates.push({ rowNumber: existing.rowNumber, values: toSheetRow(incoming) });
         rows[existingIndex] = incoming;
@@ -360,6 +362,18 @@ function allocateNumbers(count) {
   var to = from + count - 1;
   properties.setProperty(PROP_NEXT_NUMBER, String(to + 1));
   return { from: from, to: to };
+}
+
+/**
+ * מוודא שמונה המספרים מקדים כל מספר שכבר נמצא בשימוש.
+ * נחוץ כשמכשיר עבד לפני שחובר לגיליון ומספר את הארגזים בעצמו: בלי זה
+ * השרת היה מחלק שוב את אותם מספרים למכשירים אחרים.
+ */
+function reserveNumberIfNeeded(number) {
+  if (!number) return;
+  var properties = PropertiesService.getScriptProperties();
+  var next = Number(properties.getProperty(PROP_NEXT_NUMBER) || 1);
+  if (number >= next) properties.setProperty(PROP_NEXT_NUMBER, String(number + 1));
 }
 
 function formatBoxNumber(number) {

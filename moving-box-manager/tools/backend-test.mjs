@@ -233,6 +233,23 @@ check(
 );
 check('תאריך היצירה נשמר', Boolean(saved.createdAt));
 
+// --- מספור מקומי שנוצר לפני החיבור לגיליון ---
+const localFirst = call(backend, {
+  action: 'push',
+  boxes: [makeBox({ number: 30, boxNumber: 'BOX-030', room: 'מרפסת' })],
+});
+check('מספר שנקבע במכשיר נשמר כמו שהוא', localFirst.boxes[0].boxNumber === 'BOX-030');
+
+const afterLocal = call(backend, { action: 'push', boxes: [makeBox({ room: 'סלון' })] });
+check(
+  'השרת לא מחלק שוב מספר שכבר בשימוש',
+  Number(afterLocal.boxes[0].number) > 30,
+  afterLocal.boxes[0].boxNumber
+);
+
+const reserveAfterLocal = call(backend, { action: 'reserve', count: 5 });
+check('גם שריון עוקף מספרים שכבר בשימוש', reserveAfterLocal.from > 30, String(reserveAfterLocal.from));
+
 // --- אבטחה ---
 const badToken = call(backend, { action: 'ping' }, 'מפתח-שגוי');
 check('בקשה עם מפתח שגוי נדחית', badToken.ok === false && badToken.code === 'BAD_TOKEN');
