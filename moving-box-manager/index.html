@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ניהול ארגזים למעבר דירה</title>
+  <meta name="description" content="ניהול ארגזי מעבר דירה: מספור אוטומטי, קודי QR, חיפוש מהיר, הדפסת מדבקות וסנכרון בין כל המכשירים.">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ארגזים">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+</head>
+<body>
+  <div id="app" class="app"></div>
+
+  <!-- אזור ההדפסה — מוסתר על המסך ומוצג רק בהדפסה -->
+  <div id="print-root" class="print-root"></div>
+
+  <noscript>
+    <p style="padding:2rem;text-align:center">האפליקציה דורשת JavaScript פעיל.</p>
+  </noscript>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

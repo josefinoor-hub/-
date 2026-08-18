@@ -1,0 +1,61 @@
+{
+  "name": "ניהול ארגזים למעבר דירה",
+  "short_name": "ארגזים",
+  "description": "ניהול ארגזי מעבר דירה: מספור אוטומטי, קודי QR, חיפוש מהיר, הדפסת מדבקות וסנכרון בין כל המכשירים.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "moving-box-manager",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "dir": "rtl",
+  "lang": "he",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230f172a' width='192' height='192' rx='36'/><text x='50%25' y='54%25' font-size='110' text-anchor='middle' dominant-baseline='middle'>📦</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%230f172a' width='512' height='512' rx='96'/><text x='50%25' y='54%25' font-size='300' text-anchor='middle' dominant-baseline='middle'>📦</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%230f172a' width='512' height='512'/><text x='50%25' y='54%25' font-size='260' text-anchor='middle' dominant-baseline='middle'>📦</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "הוספת ארגז",
+      "short_name": "ארגז חדש",
+      "url": "./#/new",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%232563eb' width='96' height='96' rx='18'/><text x='50%25' y='54%25' font-size='56' text-anchor='middle' dominant-baseline='middle' fill='white'>＋</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "סריקת ארגז",
+      "short_name": "סריקה",
+      "url": "./#/scan",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%230f172a' width='96' height='96' rx='18'/><text x='50%25' y='54%25' font-size='52' text-anchor='middle' dominant-baseline='middle'>📷</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}
