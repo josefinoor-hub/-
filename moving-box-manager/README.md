@@ -118,11 +118,18 @@ moving-box-manager/
 
 ### שלב 2: פרסום האפליקציה
 
-האתר מפורסם ב-Netlify מהמאגר הזה. אחרי דחיפת הקוד, האפליקציה זמינה בכתובת:
+**GitHub Pages** (הדרך הפשוטה — בלי חשבון נוסף): במאגר ב-GitHub לוחצים
+**Settings ← Pages**, ותחת *Build and deployment* בוחרים *Deploy from a branch*,
+ענף `main`, תיקייה `/ (root)`, ואז **Save**. אחרי דקה-שתיים האפליקציה עולה ב:
 
 ```
-https://<שם-האתר-שלכם>.netlify.app/moving-box-manager/
+https://<שם-המשתמש>.github.io/<שם-המאגר>/moving-box-manager/
 ```
+
+שורש האתר (`index.html` שבתיקייה הראשית) מציג דף בחירה בין שתי האפליקציות.
+
+**Netlify** (אם האתר כבר מחובר שם): אין צורך בשלב build, והכתובת היא
+`https://<שם-האתר>.netlify.app/moving-box-manager/`.
 
 אין צורך בשלב build — האפליקציה בנויה מקבצים סטטיים בלבד.
 לבדיקה מקומית לפני פרסום:
