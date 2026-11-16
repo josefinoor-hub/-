@@ -9,6 +9,44 @@
 import { DB } from './config.js';
 
 let dbPromise = null;
+let storageMode = null; // 'idb' | 'local'
+
+/**
+ * אחסון חלופי מעל localStorage, למקרה ש-IndexedDB חסום — למשל בגלישה
+ * פרטית או בדף שמוגש בתוך מסגרת מבודדת. הממשק זהה, כך שכל שאר האפליקציה
+ * אינה יודעת באיזה אחסון היא משתמשת.
+ */
+const FALLBACK_KEY = 'mbm.storage.v1';
+
+function readFallback() {
+  try {
+    return JSON.parse(localStorage.getItem(FALLBACK_KEY) || '') || { boxes: {}, meta: {} };
+  } catch {
+    return { boxes: {}, meta: {} };
+  }
+}
+
+function writeFallback(data) {
+  try {
+    localStorage.setItem(FALLBACK_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.warn('שמירה לאחסון המקומי נכשלה', error);
+  }
+}
+
+/** קובע פעם אחת באיזה אחסון משתמשים, ומעדיף תמיד את IndexedDB. */
+async function mode() {
+  if (storageMode) return storageMode;
+  try {
+    if (typeof indexedDB === 'undefined') throw new Error('IndexedDB אינו קיים');
+    await openDatabase();
+    storageMode = 'idb';
+  } catch (error) {
+    console.warn('IndexedDB אינו זמין — עוברים לאחסון מקומי', error);
+    storageMode = 'local';
+  }
+  return storageMode;
+}
 
 function openDatabase() {
   if (dbPromise) return dbPromise;
@@ -58,45 +96,81 @@ function runTransaction(storeName, mode, operation) {
 
 /** כל הארגזים במטמון, כולל כאלה שסומנו כמחוקים. */
 export async function getAllBoxes() {
+  if ((await mode()) === 'local') return Object.values(readFallback().boxes);
   const boxes = await runTransaction(DB.STORE_BOXES, 'readonly', (store) => store.getAll());
   return boxes || [];
 }
 
-export function putBox(box) {
+export async function putBox(box) {
+  if ((await mode()) === 'local') {
+    const data = readFallback();
+    data.boxes[box.id] = box;
+    writeFallback(data);
+    return box.id;
+  }
   return runTransaction(DB.STORE_BOXES, 'readwrite', (store) => store.put(box));
 }
 
 /** כתיבת אצווה — משמשת בעיקר לקליטת תוצאות סנכרון. */
-export function putBoxes(boxes) {
+export async function putBoxes(boxes) {
+  if ((await mode()) === 'local') {
+    const data = readFallback();
+    for (const box of boxes) data.boxes[box.id] = box;
+    writeFallback(data);
+    return boxes.length;
+  }
   return runTransaction(DB.STORE_BOXES, 'readwrite', (store) => {
     for (const box of boxes) store.put(box);
     return boxes.length;
   });
 }
 
-export function getBox(id) {
+export async function getBox(id) {
+  if ((await mode()) === 'local') return readFallback().boxes[id] || undefined;
   return runTransaction(DB.STORE_BOXES, 'readonly', (store) => store.get(id));
 }
 
-export function deleteBoxPermanently(id) {
+export async function deleteBoxPermanently(id) {
+  if ((await mode()) === 'local') {
+    const data = readFallback();
+    delete data.boxes[id];
+    writeFallback(data);
+    return;
+  }
   return runTransaction(DB.STORE_BOXES, 'readwrite', (store) => store.delete(id));
 }
 
-export function clearBoxes() {
+export async function clearBoxes() {
+  if ((await mode()) === 'local') {
+    const data = readFallback();
+    data.boxes = {};
+    writeFallback(data);
+    return;
+  }
   return runTransaction(DB.STORE_BOXES, 'readwrite', (store) => store.clear());
 }
 
 /** ערך מטא־נתונים (סמן סנכרון, מאגר מספרים וכדומה). */
-export async function getMeta(key, fallback = null) {
+export async function getMeta(key, fallbackValue = null) {
+  if ((await mode()) === 'local') {
+    const stored = readFallback().meta[key];
+    return stored === undefined ? fallbackValue : stored;
+  }
   const record = await runTransaction(DB.STORE_META, 'readonly', (store) => store.get(key));
-  return record ? record.value : fallback;
+  return record ? record.value : fallbackValue;
 }
 
-export function setMeta(key, value) {
+export async function setMeta(key, value) {
+  if ((await mode()) === 'local') {
+    const data = readFallback();
+    data.meta[key] = value;
+    writeFallback(data);
+    return;
+  }
   return runTransaction(DB.STORE_META, 'readwrite', (store) => store.put({ key, value }));
 }
 
-/** בדיקה שהדפדפן תומך באחסון המקומי הנדרש. */
+/** בדיקה שיש אחסון כלשהו לעבוד מולו. */
 export function isSupported() {
-  return typeof indexedDB !== 'undefined';
+  return typeof indexedDB !== 'undefined' || typeof localStorage !== 'undefined';
 }
