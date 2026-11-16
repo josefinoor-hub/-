@@ -78,13 +78,13 @@ export function itemsSummary(box, maxChars = QR_SUMMARY_MAX_CHARS) {
  * התכולה — היא נקראת גם באפליקציה וגם בכל סורק גנרי, ואינה תלויה ברשת.
  * במצב 'url' מקודד קישור שפותח את הארגז ישירות באפליקציה.
  */
-export function buildQrPayload(box, { mode = 'text', baseUrl = '' } = {}) {
+export function buildQrPayload(box, { mode = 'text', baseUrl = '', summaryMax = QR_SUMMARY_MAX_CHARS } = {}) {
   const number = box.boxNumber || formatBoxNumber(box.number) || box.id.slice(0, 8);
   if (mode === 'url') {
     const base = baseUrl || (typeof location !== 'undefined' ? location.origin + location.pathname : '');
     return `${base}#/box/${encodeURIComponent(number)}`;
   }
-  return [QR_PREFIX, number, box.room || '', itemsSummary(box)].join('|');
+  return [QR_PREFIX, number, box.room || '', summaryMax > 0 ? itemsSummary(box, summaryMax) : ''].join('|');
 }
 
 /**
