@@ -19,7 +19,13 @@ const DEFAULTS = {
   labelSize: DEFAULT_LABEL_SIZE,
   /** תוכן ה-QR: 'text' — מזהה, חדר ותמצית תכולה. 'url' — קישור לאפליקציה. */
   qrMode: 'text',
-  /** רוחב נייר במדפסת התרמית (מ"מ). */
+  /** סוג מדפסת המדבקות שמחוברת ב-Bluetooth: 'niimbot' או 'escpos'. */
+  printerType: 'niimbot',
+  /** גליל המדבקות שטעון ב-NIIMBOT. */
+  niimbotLabel: '50x30',
+  /** כהות ההדפסה ב-NIIMBOT, בין 1 ל-5. */
+  niimbotDensity: 3,
+  /** רוחב נייר במדפסת קבלות ESC/POS (מ"מ). */
   thermalWidth: 58,
   /** סנכרון אוטומטי פעיל. */
   autoSync: true,

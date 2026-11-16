@@ -7,7 +7,8 @@ import { LABEL_SIZES } from '../config.js';
 import { buildQrPayload, markDeleted, roomInfo } from '../boxes.js';
 import * as store from '../store.js';
 import * as label from '../label.js';
-import * as thermal from '../thermal.js';
+import * as printer from '../printer.js';
+import { printOnLabelPrinter } from './printFlow.js';
 import { getSettings, saveSettings } from '../settings.js';
 import { openModal, close as closeModal, confirmAction, toast } from '../dialogs.js';
 import { escapeHtml, formatDateTime, formatRelative, el } from '../util.js';
@@ -74,7 +75,7 @@ export function openBoxDetail(boxId) {
         </div>
         <div class="print-actions">
           <button type="button" class="button button--primary" data-action="print">🖨️ הדפס מדבקה</button>
-          <button type="button" class="button button--ghost" data-action="thermal">📶 מדפסת תרמית</button>
+          <button type="button" class="button button--ghost" data-action="label-printer">📶 ${escapeHtml(printer.typeLabel())}</button>
         </div>
       </div>
     `;
@@ -101,23 +102,8 @@ export function openBoxDetail(boxId) {
       return;
     }
 
-    if (actionButton.dataset.action === 'thermal') {
-      if (!thermal.isSupported()) {
-        toast('הדפסה תרמית נתמכת ב-Chrome לאנדרואיד בלבד. השתמשו בכפתור ההדפסה הרגיל.', {
-          type: 'error',
-          duration: 5000,
-        });
-        return;
-      }
-      actionButton.disabled = true;
-      try {
-        await thermal.printBoxes(current, { widthMm: getSettings().thermalWidth });
-        toast(`נשלח למדפסת ${thermal.connectedName() || 'התרמית'}`, { type: 'success' });
-      } catch (error) {
-        toast(error.message || 'ההדפסה נכשלה', { type: 'error', duration: 5000 });
-      } finally {
-        actionButton.disabled = false;
-      }
+    if (actionButton.dataset.action === 'label-printer') {
+      await printOnLabelPrinter(current, { button: actionButton });
     }
   });
 

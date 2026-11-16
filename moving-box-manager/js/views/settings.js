@@ -7,7 +7,8 @@ import * as api from '../api.js';
 import * as sync from '../sync.js';
 import * as store from '../store.js';
 import * as numbers from '../numbers.js';
-import * as thermal from '../thermal.js';
+import * as printer from '../printer.js';
+import { NIIMBOT_LABELS, PRINTER_TYPES } from '../config.js';
 import { getSettings, saveSettings } from '../settings.js';
 import { qrToSvg } from '../qr.js';
 import { openModal, confirmAction, toast } from '../dialogs.js';
@@ -79,15 +80,42 @@ export function openSettings() {
         </select>
       </label>
       <label class="field">
-        <span class="field__label">רוחב נייר במדפסת תרמית</span>
-        <select class="input" name="thermalWidth">
-          <option value="58" ${Number(settings.thermalWidth) === 58 ? 'selected' : ''}>58 מ"מ</option>
-          <option value="80" ${Number(settings.thermalWidth) === 80 ? 'selected' : ''}>80 מ"מ</option>
+        <span class="field__label">סוג מדפסת</span>
+        <select class="input" name="printerType">
+          ${Object.entries(PRINTER_TYPES)
+            .map(([id, label]) => `<option value="${id}" ${settings.printerType === id ? 'selected' : ''}>${escapeHtml(label)}</option>`)
+            .join('')}
         </select>
       </label>
+      <div data-role="niimbot-settings" ${settings.printerType !== 'niimbot' ? 'hidden' : ''}>
+        <label class="field">
+          <span class="field__label">מידת מדבקה NIIMBOT</span>
+          <select class="input" name="niimbotLabel">
+            ${Object.entries(NIIMBOT_LABELS)
+              .map(([id, info]) => `<option value="${id}" ${settings.niimbotLabel === id ? 'selected' : ''}>${escapeHtml(info.label)}</option>`)
+              .join('')}
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">כהות הדפסה (1-5)</span>
+          <input class="input" type="range" name="niimbotDensity" min="1" max="5" step="1" value="${settings.niimbotDensity}">
+        </label>
+      </div>
+      <div data-role="escpos-settings" ${settings.printerType !== 'escpos' ? 'hidden' : ''}>
+        <label class="field">
+          <span class="field__label">רוחב נייר</span>
+          <select class="input" name="thermalWidth">
+            <option value="58" ${Number(settings.thermalWidth) === 58 ? 'selected' : ''}>58 מ"מ</option>
+            <option value="80" ${Number(settings.thermalWidth) === 80 ? 'selected' : ''}>80 מ"מ</option>
+          </select>
+        </label>
+      </div>
       <div class="settings__buttons">
-        <button type="button" class="button button--ghost" data-action="thermal-connect">
-          🔗 חיבור מדפסת תרמית
+        <button type="button" class="button button--ghost" data-action="printer-connect">
+          🔗 חיבור מדפסת
+        </button>
+        <button type="button" class="button button--ghost" data-action="printer-test">
+          🖨️ הדפסת בדיקה
         </button>
       </div>
     </section>
@@ -134,8 +162,13 @@ export function openSettings() {
   // שמירת העדפות מיידית בכל שינוי — בלי כפתור שמירה נפרד
   body.addEventListener('change', (event) => {
     const { name, value } = event.target;
-    if (['deviceName', 'labelSize', 'qrMode', 'thermalWidth'].includes(name)) {
-      saveSettings({ [name]: name === 'thermalWidth' ? Number(value) : value });
+    const numberFields = new Set(['thermalWidth', 'niimbotDensity']);
+    if (['deviceName', 'labelSize', 'qrMode', 'thermalWidth', 'printerType', 'niimbotLabel', 'niimbotDensity'].includes(name)) {
+      saveSettings({ [name]: numberFields.has(name) ? Number(value) : value });
+      if (name === 'printerType') {
+        body.querySelector('[data-role="niimbot-settings"]').hidden = value !== 'niimbot';
+        body.querySelector('[data-role="escpos-settings"]').hidden = value !== 'escpos';
+      }
       toast('ההעדפה נשמרה', { duration: 1500 });
     }
   });
@@ -171,9 +204,14 @@ export function openSettings() {
 
       if (action === 'export') exportCsv();
 
-      if (action === 'thermal-connect') {
-        await thermal.connect();
-        toast(`מחובר ל-${thermal.connectedName() || 'מדפסת'}`, { type: 'success' });
+      if (action === 'printer-connect') {
+        await printer.connect();
+        toast(`מחובר ל-${printer.connectedName() || printer.typeLabel()}`, { type: 'success' });
+      }
+
+      if (action === 'printer-test') {
+        const { printOnLabelPrinter, sampleBox } = await import('./printFlow.js');
+        await printOnLabelPrinter(sampleBox(), { button });
       }
 
       if (action === 'reset') {

@@ -6,7 +6,7 @@
  * כדי שלא יוצגו נתונים ישנים במקום תשובה אמיתית.
  */
 
-const CACHE_NAME = 'moving-box-manager-v1';
+const CACHE_NAME = 'moving-box-manager-v2';
 
 const APP_SHELL = [
   './',
@@ -27,11 +27,15 @@ const APP_SHELL = [
   './js/settings.js',
   './js/store.js',
   './js/sync.js',
+  './js/labelCanvas.js',
+  './js/niimbot.js',
+  './js/printer.js',
   './js/thermal.js',
   './js/ui.js',
   './js/util.js',
   './js/views/boxDetail.js',
   './js/views/boxForm.js',
+  './js/views/printFlow.js',
   './js/views/scan.js',
   './js/views/settings.js',
 ];

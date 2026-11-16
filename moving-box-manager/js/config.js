@@ -101,6 +101,36 @@ export const LABEL_SIZES = {
 
 export const DEFAULT_LABEL_SIZE = '100x60';
 
+/**
+ * מדפסת המדבקות NIIMBOT B1.
+ * ראש ההדפסה שלה ברוחב 384 נקודות (48 מ"מ) בצפיפות 8 נקודות למילימטר,
+ * והיא מדברת פרוטוקול ייעודי של NIIMBOT ולא ESC/POS.
+ */
+export const NIIMBOT = {
+  DOTS_PER_MM: 8,
+  PRINTHEAD_DOTS: 384,
+  SERVICE_UUID: 'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+  DEFAULT_LABEL: '50x30',
+  DEFAULT_DENSITY: 3,
+};
+
+/** גלילי המדבקות הנפוצים ל-B1. המידה הראשונה היא רוחב הגליל. */
+export const NIIMBOT_LABELS = {
+  '50x30': { id: '50x30', label: '50×30 מ"מ', widthMm: 50, heightMm: 30 },
+  '40x30': { id: '40x30', label: '40×30 מ"מ', widthMm: 40, heightMm: 30 },
+  '40x20': { id: '40x20', label: '40×20 מ"מ', widthMm: 40, heightMm: 20 },
+  '30x20': { id: '30x20', label: '30×20 מ"מ', widthMm: 30, heightMm: 20 },
+  '50x50': { id: '50x50', label: '50×50 מ"מ', widthMm: 50, heightMm: 50 },
+  '40x60': { id: '40x60', label: '40×60 מ"מ', widthMm: 40, heightMm: 60 },
+  '50x80': { id: '50x80', label: '50×80 מ"מ', widthMm: 50, heightMm: 80 },
+};
+
+/** סוגי מדפסות המדבקות הנתמכות בחיבור Bluetooth. */
+export const PRINTER_TYPES = {
+  niimbot: 'NIIMBOT B1',
+  escpos: 'מדפסת קבלות (ESC/POS)',
+};
+
 /** רוחב ההדפסה בנקודות עבור מדפסות תרמיות נפוצות. */
 export const THERMAL_WIDTHS = {
   58: 384,
